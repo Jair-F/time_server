@@ -1,0 +1,24 @@
+
+services:
+  chrony_srv:
+    image: cturra/ntp:latest
+    container_name: chrony_srv
+    restart: unless-stopped
+    # CRITICAL: Gives container access to Host NIC for hardware timestamping
+    network_mode: "host"
+    # CRITICAL: Allows Chrony to modify/discipline system time if needed
+    privileged: true
+    cap_add:
+      - SYS_TIME
+      - SYS_RESOURCE
+    environment:
+      - NTP_SERVERS=127.0.0.1
+    volumes:
+      - ./chrony.conf:/etc/chrony/chrony.conf:ro
+      - ./chrony_data:/var/lib/chrony
+    # OPTIONAL: Map your host GPS device if passing via serial/USB instead of SHM
+    # devices:
+    #   - "/dev/ttyUSB0:/dev/ttyUSB0"
+
+
+
