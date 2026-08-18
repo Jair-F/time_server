@@ -5,7 +5,7 @@ sudo apt install -y chrony vim
 cp ./chrony.conf /etc/chrony/chrony.conf
 
 # chronyd -Q 'server 127.0.0.1 maxsamples 1'
-sudo systemctl restart chronyd
+# sudo systemctl restart chronyd
 
 # docker build -t tmp .
 # docker run -it --rm --privileged --cap-add=SYS_TIME tmp bash
