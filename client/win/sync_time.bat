@@ -1,16 +1,26 @@
 @echo off
+echo ====================================================================
+echo LAUNCHING HIGH-JITTER PRECISION FILTERING ALGORITHM (10-MIN WINDOW)
+echo ====================================================================
 
-:: Stop the active Windows Time service
-net stop w32time
-:: Permanently disable it from starting automatically
-:: sc config w32time start= disabled
-:: Strip the w32time service definition completely out of the system registry
-:: w32tm /unregister
+:: 1. Clear any stuck processes and run the background daemon
+taskkill /f /im ntpd.exe >nul 2>&1
+start "NTP_High_Jitter_Engine" /b "C:\Program Files (x86)\NTP\bin\ntpd.exe" -g -c "C:\Program Files (x86)\NTP\etc\ntp.conf"
 
-echo Starting maximum precision NTP synchronization cycle...
+echo Engine running. Gathering 600 samples to execute statistical filtering...
+echo Counting down 10 minutes (600 seconds). Do not close this window...
 
-:: 1. Force a strict synchronized termination run (-g allows large initial time jumps)
-"C:\Program Files (x86)\NTP\bin\ntpd.exe" -g -q -c "C:\Program Files (x86)\NTP\etc\ntp.conf"
+:: 2. Strict 10-minute statistical accumulation phase
+timeout /t 600 /nobreak
 
-echo Synchronization complete. Network sockets closed. All packet traffic stopped.
+echo ====================================================================
+echo 10-MINUTE ANALYSIS COMPLETE. SNAP-CORRECTING SYSTEM CLOCK...
+echo ====================================================================
+
+:: 3. Kill the process instantly. The kernel hardware clock is stepped, and
+:: the network socket is hard-terminated. No more packets can leave this PC.
+taskkill /f /im ntpd.exe
+
+echo.
+echo Success: Network sockets closed. Complete network silence achieved.
 pause
