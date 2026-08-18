@@ -7,9 +7,4 @@ While your 15-minute sync script is active, you can monitor the real-time jitter
 chronyd -Q 'server 127.0.0.1 maxsamples 1'
 "C:\Program Files (x86)\NTP\bin\ntpdate.exe" -q 192.168.1.100
 
-srv stats:
-docker exec -it chrony_srv chronyc clients
-docker exec -it chrony_srv chronyc tracking
 
-# Give it 10 seconds, then check your server's live tracking status:
-docker exec -it chrony_srv chronyc sources -v
