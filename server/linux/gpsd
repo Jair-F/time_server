@@ -1,0 +1,5 @@
+# /etc/default/gpsd
+START_DAEMON="true"
+USBAUTO="true"
+DEVICES="/dev/ttyUSB0 /dev/pps0"
+GPSD_OPTIONS="-n" # -n tells GPSD not to wait for a client to start polling
