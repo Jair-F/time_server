@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# sudo apt install chrony
+sudo apt install -y chrony vim
 # copy the chrony file to the right place
 cp ./chrony.conf /etc/chrony/chrony.conf
 

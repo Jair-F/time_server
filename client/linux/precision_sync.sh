@@ -7,10 +7,12 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-SERVER_IP="192.168.1.100"
+# /etc/init.d/chrony start
+
+SERVER_IP="172.18.0.1"
 
 echo "[1/5] Setting Chrony server status to ONLINE..."
-chronyc online "$SERVER_IP"
+chronyc online #"$SERVER_IP"
 
 echo "[2/5] Triggering rapid 8-packet burst for immediate lock..."
 chronyc burst 8/8
@@ -32,9 +34,8 @@ sleep 895
 echo "[5/5] Saving drift metrics and taking server OFFLINE..."
 # Force Chrony to write the calculated frequency drift to disk
 chronyc dump
-chronyc writetracking
 
 # Disconnect server to stop all outbound UDP NTP traffic
-chronyc offline "$SERVER_IP"
+chronyc offline #"$SERVER_IP"
 
 echo "Time synchronization routine completed successfully."
