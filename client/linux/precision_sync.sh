@@ -1,24 +1,40 @@
 #!/bin/bash
+set -e
+
 # Check for root privileges
 if [ "$EUID" -ne 0 ]; then 
-  echo "Please run as root"
+  echo "Error: Please run as root"
   exit 1
 fi
 
-echo "1. Opening firewall and telling Chrony the server is ONLINE..."
-chronyc online
+SERVER_IP="192.168.1.100"
 
-echo "2. Forcing an aggressive packet burst to jumpstart jitter analysis..."
-chronyc burst 4/16
+echo "[1/5] Setting Chrony server status to ONLINE..."
+chronyc online "$SERVER_IP"
 
-echo "3. Analyzing network delays for 15 minutes to find maximum precision..."
-# Wait 15 minutes (900 seconds)
-sleep 900
+echo "[2/5] Triggering rapid 8-packet burst for immediate lock..."
+chronyc burst 8/8
 
-echo "4. Forcing immediate clock correction based on best statistical samples..."
-chronyc makestep
+echo "[3/5] Waiting 5 seconds for initial step and frequency adjustment..."
+sleep 5
 
-echo "5. Forcing server OFFLINE. Closing sockets. Traffic stopped."
-chronyc offline
+# Force immediate step right away if offset exists (just in case)
+chronyc makestep > /dev/null 2>&1 || true
 
-echo "Time synchronization routine finished successfully."
+# Display initial offset status to logs/console
+echo "Initial synchronization state:"
+chronyc tracking | grep -E "(RMS offset|System time|Frequency)"
+
+echo "[4/5] Disciplining local clock for 15 minutes..."
+# Wait remainder of the 15-minute window (895s)
+sleep 895
+
+echo "[5/5] Saving drift metrics and taking server OFFLINE..."
+# Force Chrony to write the calculated frequency drift to disk
+chronyc dump
+chronyc writetracking
+
+# Disconnect server to stop all outbound UDP NTP traffic
+chronyc offline "$SERVER_IP"
+
+echo "Time synchronization routine completed successfully."
